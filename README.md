@@ -21,7 +21,7 @@ Add `off_broadway_telegram` and [`Nadia`](https://github.com/zhyu/nadia) to your
 ```elixir
 def deps do
   [
-    {:broadway_telegram, "~> 0.1.0"},
+    {:off_broadway_telegram, "~> 0.1.0"},
     {:nadia, "~> 0.7.0"}
   ]
 end
