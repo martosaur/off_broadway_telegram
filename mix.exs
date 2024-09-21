@@ -28,9 +28,9 @@ defmodule OffBroadway.Telegram.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:broadway, "~> 1.0.0"},
+      {:broadway, "~> 1.1"},
       {:nadia, "~> 0.7.0"},
-      {:ex_doc, "~> 0.25.2", only: :docs}
+      {:ex_doc, "~> 0.34", only: :docs}
     ]
   end
 
