@@ -3,27 +3,15 @@ defmodule OffBroadway.Telegram.ProducerTest do
 
   defmodule MessageServer do
     def start_link() do
-      Agent.start_link(fn -> {[], []} end)
+      Agent.start_link(fn -> [] end)
     end
 
     def push_messages(server, messages) do
-      Agent.update(server, fn {queue, resupply} -> {queue ++ messages, resupply} end)
-    end
-
-    def push_resupply(server, messages) do
-      Agent.update(server, fn {queue, resupply} -> {queue, resupply ++ messages} end)
+      Agent.update(server, fn queue -> queue ++ messages end)
     end
 
     def take_messages(server, amount) do
-      Agent.get_and_update(server, fn {queue, resupply} ->
-        case Enum.split(queue, amount) do
-          {result, []} ->
-            {result, {resupply, []}}
-
-          {result, remaining_queue} ->
-            {result, {remaining_queue, resupply}}
-        end
-      end)
+      Agent.get_and_update(server, fn queue -> Enum.split(queue, amount) end)
     end
   end
 
@@ -57,19 +45,9 @@ defmodule OffBroadway.Telegram.ProducerTest do
   defmodule Forwarder do
     use Broadway
 
-    def start_link(opts), do: GenServer.start_link(__MODULE__, opts)
-
-    def init(opts) do
-      {:ok, opts}
-    end
-
     def handle_message(_, message, %{test_pid: test_pid}) do
       send(test_pid, {:message_handled, message.data})
       message
-    end
-
-    def handle_batch(_, messages, _, _) do
-      messages
     end
   end
 
@@ -140,32 +118,24 @@ defmodule OffBroadway.Telegram.ProducerTest do
   defp start_broadway(broadway_name \\ new_unique_name(), message_server, opts \\ []) do
     Broadway.start_link(
       Forwarder,
-      build_broadway_opts(broadway_name, opts,
-        client: {FakeTelegramClient, [test_pid: self(), message_server: message_server]},
-        receive_interval: 0
-      )
-    )
-  end
-
-  defp build_broadway_opts(name, opts, producer_opts) do
-    [
-      name: name,
+      name: broadway_name,
       context: %{test_pid: self()},
       producer: [
-        module: {OffBroadway.Telegram.Producer, Keyword.merge(producer_opts, opts)},
+        module:
+          {OffBroadway.Telegram.Producer,
+           Keyword.merge(
+             [
+               client: {FakeTelegramClient, [test_pid: self(), message_server: message_server]},
+               receive_interval: 0
+             ],
+             opts
+           )},
         concurrency: 1
       ],
       processors: [
         default: [concurrency: 1]
-      ],
-      batchers: [
-        default: [
-          batch_size: 5,
-          batch_timeout: 50,
-          concurrency: 1
-        ]
       ]
-    ]
+    )
   end
 
   defp new_unique_name() do

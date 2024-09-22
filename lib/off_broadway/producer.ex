@@ -39,7 +39,7 @@ defmodule OffBroadway.Telegram.Producer do
   end
 
   @impl GenStage
-  def handle_info(:receive_messages, %{receive_timer: nil} = state) do
+  def handle_info(:receive_messages, %{receive_timer: :waiting_for_demand} = state) do
     {:noreply, [], state}
   end
 
@@ -56,8 +56,11 @@ defmodule OffBroadway.Telegram.Producer do
 
     receive_timer =
       case {messages, new_demand} do
+        # No messages, let's sleep a little
         {[], _} -> schedule_receive_interval(state.receive_interval)
-        {_, 0} -> nil
+        # We fully met the demand, wait for next ask
+        {_, 0} -> :waiting_for_demand
+        # Demand not met, fetch more immediately
         _ -> schedule_receive_interval(0)
       end
 
