@@ -29,7 +29,7 @@ defmodule OffBroadway.Telegram.MixProject do
   defp deps do
     [
       {:broadway, "~> 1.1"},
-      {:nadia, "~> 0.7.0"},
+      {:nadia, "~> 0.7.0", optional: true},
       {:ex_doc, "~> 0.34", only: :docs}
     ]
   end
