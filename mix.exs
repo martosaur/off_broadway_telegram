@@ -30,6 +30,7 @@ defmodule OffBroadway.Telegram.MixProject do
     [
       {:broadway, "~> 1.1"},
       {:nadia, "~> 0.7.0", optional: true},
+      {:req, "~> 0.5", optional: true},
       {:ex_doc, "~> 0.34", only: :docs}
     ]
   end
