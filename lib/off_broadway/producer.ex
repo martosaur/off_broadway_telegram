@@ -6,15 +6,15 @@ defmodule OffBroadway.Telegram.Producer do
 
   The following options are supported:
 
-    * `receive_interval` - for how long (in milliseconds) a producer will wait before checking for updates.
-    * `client` - a module-options tuple that implements `OffBroadway.Telegram.TelegramClient` behaviour. Default: `{OffBroadway.Telegram.NadiaClient, []}`
+    * `receive_interval` - for how long (in milliseconds) a producer will wait before checking for updates. Default: 1000
+    * `client` - a module-options tuple that implements `OffBroadway.Telegram.TelegramClient` behaviour. Default: `{OffBroadway.Telegram.ReqClient, []}`
 
   """
   use GenStage
 
   @behaviour Broadway.Producer
 
-  @default_client {OffBroadway.Telegram.NadiaClient, []}
+  @default_client {OffBroadway.Telegram.ReqClient, []}
   @default_receive_interval 1_000
 
   @impl GenStage

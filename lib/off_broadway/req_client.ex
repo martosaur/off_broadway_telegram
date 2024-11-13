@@ -1,7 +1,7 @@
 if Code.ensure_loaded?(Req) do
   defmodule OffBroadway.Telegram.ReqClient do
     @moduledoc """
-    TelegramClient implementation using simple `Req`
+    `TelegramClient` implementation using `Req`.
     """
     require Logger
 

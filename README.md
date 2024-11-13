@@ -6,7 +6,7 @@ This package provides:
 
   * `OffBroadway.Telegram.Producer` - Broadway producer that polls updates from Telegram `getUpdates` long polling endpoint and feeds them through Broadway pipeline
   * `OffBroadway.Telegram.TelegramClient` - A generic behaviour to implement Telegram client
-  * `OffBroadway.Telegram.NadiaClient` - Default Telegram client based on [`Nadia`](https://github.com/zhyu/nadia) package
+  * `OffBroadway.Telegram.ReqClient` - Telegram client based on `Req` package
 
 ## Why
 
@@ -16,13 +16,13 @@ But hey, we can use Broadway for this!
 
 ## Installation
 
-Add `off_broadway_telegram` and [`Nadia`](https://github.com/zhyu/nadia) to your list of dependencies in `mix.exs` :
+Add `off_broadway_telegram` and `Req` to your list of dependencies in `mix.exs` :
 
 ```elixir
 def deps do
   [
     {:off_broadway_telegram, "~> 0.1.0"},
-    {:nadia, "~> 0.7.0"}
+    {:req, "~> 0.5.7"}
   ]
 end
 ```
@@ -35,11 +35,13 @@ All you need to do is define a pipeline like this:
 defmodule BroadwayTelegramExample do
   use Broadway
 
-  def start_link(_opts) do
+  def start_link(bot_token) do
     Broadway.start_link(__MODULE__,
       name: __MODULE__,
       producer: [
-        module: {OffBroadway.Telegram.Producer, []},
+        module:
+          {OffBroadway.Telegram.Producer,
+           [client: {OffBroadway.Telegram.ReqClient, [token: bot_token]}]},
         concurrency: 1
       ],
       processors: [
@@ -52,17 +54,25 @@ defmodule BroadwayTelegramExample do
   def handle_message(
         _processor,
         %Broadway.Message{
-          data: %Nadia.Model.Update{
-            message: %Nadia.Model.Message{text: text, chat: %Nadia.Model.Chat{id: chat_id}}
-          }
+          data: update
         } = message,
         _context
       ) do
-    {:ok, _} = Nadia.send_message(chat_id, text)
+    MyApp.process_update(update)
 
     message
   end
 end
+```
+
+and add it to your application's supervisor tree in `application.ex`:
+
+```
+children = [
+  {BroadwayTelegramExample, [Application.fetch_env!(:myapp, :bot_token)]]}
+]
+
+Supervisor.start_link(children, strategy: :one_for_one)
 ```
 
 Everything else is up to your creativity!
@@ -71,6 +81,5 @@ Everything else is up to your creativity!
 
 Worth noting that **Telegram `getUpdates` is not a proper pubsub** like Google PubSub or SQS! This means:
 
-  1. this producer is illegal
-  2. you don't want to run more than one producer process per bot
-  3. there is no ack/nack and therefore no built-in retry mechanism
+  1. you don't want to run more than one producer process per bot
+  2. there is no ack/nack and therefore no built-in retry mechanism
