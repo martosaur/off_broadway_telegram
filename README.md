@@ -5,8 +5,7 @@ An Off-[Broadway](https://github.com/dashbitco/broadway) producer for [Telegram 
 This package provides:
 
   * `OffBroadway.Telegram.Producer` - Broadway producer that polls updates from Telegram `getUpdates` long polling endpoint and feeds them through Broadway pipeline
-  * `OffBroadway.Telegram.TelegramClient` - A generic behaviour to implement Telegram client
-  * `OffBroadway.Telegram.ReqClient` - Telegram client based on `Req` package
+  * `OffBroadway.Telegram.ReqClient` - Req-backed client used by the producer to call Telegram Bot API
 
 ## Why
 
@@ -16,13 +15,12 @@ But hey, we can use Broadway for this!
 
 ## Installation
 
-Add `off_broadway_telegram` and `Req` to your list of dependencies in `mix.exs` :
+Add `off_broadway_telegram` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:off_broadway_telegram, "~> 0.1.0"},
-    {:req, "~> 0.5.7"}
+    {:off_broadway_telegram, "~> 2.0"}
   ]
 end
 ```
@@ -41,7 +39,7 @@ defmodule BroadwayTelegramExample do
       producer: [
         module:
           {OffBroadway.Telegram.Producer,
-           [client: {OffBroadway.Telegram.ReqClient, [token: bot_token]}]},
+           token: bot_token},
         concurrency: 1
       ],
       processors: [
