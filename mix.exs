@@ -1,14 +1,14 @@
 defmodule OffBroadway.Telegram.MixProject do
   use Mix.Project
 
-  @version "1.0.0"
+  @version "2.0.0"
   @description "Off-Broadway producer for Telegram Bot API"
 
   def project do
     [
       app: :off_broadway_telegram,
       version: @version,
-      elixir: "~> 1.13",
+      elixir: "~> 1.15",
       name: "OffBroadwayTelegram",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -29,7 +29,8 @@ defmodule OffBroadway.Telegram.MixProject do
   defp deps do
     [
       {:broadway, "~> 1.1"},
-      {:req, "~> 0.5", optional: true},
+      {:req, "~> 0.5"},
+      {:plug, "~> 1.19", only: [:test]},
       {:ex_doc, "~> 0.34", only: [:dev, :test]}
     ]
   end
