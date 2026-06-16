@@ -39,7 +39,8 @@ defmodule BroadwayTelegramExample do
       producer: [
         module:
           {OffBroadway.Telegram.Producer,
-           token: bot_token},
+           token: bot_token,
+           task_supervisor: BroadwayTelegramExample.TaskSupervisor},
         concurrency: 1
       ],
       processors: [
@@ -67,6 +68,7 @@ and add it to your application's supervisor tree in `application.ex`:
 
 ```
 children = [
+  {Task.Supervisor, name: BroadwayTelegramExample.TaskSupervisor},
   {BroadwayTelegramExample, [Application.fetch_env!(:myapp, :bot_token)]]}
 ]
 
