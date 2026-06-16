@@ -36,7 +36,16 @@ defmodule OffBroadway.Telegram.ReqClient do
         {last_update_id + 1, broadway_messages}
 
       error ->
-        Logger.error("Error while polling Telegram updates: #{inspect(error)}")
+        Logger.error(
+          %{
+            log_id: {OffBroadway.Telegram, :polling_updates_failed},
+            error: error
+          },
+          error: error,
+          report_cb: fn %{error: error} ->
+            {"Error while polling Telegram updates: ~tw", [error]}
+          end
+        )
 
         {offset, []}
     end
