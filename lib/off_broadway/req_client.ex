@@ -22,12 +22,14 @@ defmodule OffBroadway.Telegram.ReqClient do
       url: @url,
       json: params,
       path_params: [token: token],
-      retry: false,
       receive_timeout: :timer.seconds(params[:timeout] + 1)
     )
     |> Req.merge(opts)
     |> Req.post()
     |> case do
+      {:ok, %{status: 200, body: %{"ok" => true, "result" => []}}} ->
+        {offset, []}
+
       {:ok, %{status: 200, body: %{"ok" => true, "result" => messages}}} ->
         {last_update_id, broadway_messages} = process_messages(messages)
 
